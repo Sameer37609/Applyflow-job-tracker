@@ -2275,3 +2275,21 @@ th {
     font-size: 18px;
   }
 }
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #1e293b;
+}
+.demo-banner strong { font-size: 14px; }
+.demo-banner p { margin: 5px 0 0; font-size: 13px; line-height: 1.6; }
+.demo-banner a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: #3730a3; font-size: 13px; font-weight: 600; }
+@media (max-width: 640px) {
+  .demo-banner { flex-direction: column; align-items: flex-start; padding: 16px; gap: 10px; }
+}

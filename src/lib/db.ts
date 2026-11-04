@@ -1,6 +1,9 @@
 import "server-only";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { isReadOnlyDemo } from "./deployment-mode";
+
+if (isReadOnlyDemo()) throw new Error("Database access is disabled in the read-only portfolio demo.");
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 function createClient() {

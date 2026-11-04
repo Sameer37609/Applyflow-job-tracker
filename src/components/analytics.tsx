@@ -5,9 +5,11 @@ import { getAnalytics } from "@/lib/analytics";
 export function Analytics({
   applications,
   today,
+  demo = false,
 }: {
   applications: Application[];
   today: string;
+  demo?: boolean;
 }) {
   const { total, counts, months, conversion, progressed, periodTotal } =
     getAnalytics(applications, today);
@@ -25,7 +27,7 @@ export function Analytics({
           <span className="eyebrow">THE BIGGER PICTURE</span>
           <h2>Your search, in perspective.</h2>
         </div>
-        <span>All saved applications · independent of list filters</span>
+        <span>{demo ? "All fictional demo applications" : "All saved applications"} · independent of list filters</span>
       </div>
       <div className="analytics-grid">
         <section

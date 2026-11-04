@@ -2,7 +2,7 @@
 
 A focused workspace for organizing a job search: track applications, keep notes, and understand progress through clear, database-backed analytics.
 
-ApplyFlow is a single-user, local portfolio application. It uses a real SQLite database and preserves records across browser refreshes and server restarts. It is not currently a public multi-user service.
+ApplyFlow has two modes: a single-user local workspace with real SQLite persistence, and a clearly labeled, read-only portfolio demo for Vercel. The public demo uses fictional examples, never personal database records. It is not a public multi-user service.
 
 ## Features
 
@@ -61,7 +61,9 @@ Prisma and SQLite have native setup steps. The pnpm configuration allows the req
 
 | Name | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Required, server-only SQLite file location. See the non-secret local example in `.env.example`. |
+| `DATABASE_URL` | Required for local CRUD only: server-only SQLite file location. Omit on Vercel. |
+| `APPLYFLOW_DEMO` | Set to `1` for the read-only fictional demo. Vercel also forces this mode through its system `VERCEL=1` flag. |
+| `ENABLE_EXPERIMENTAL_COREPACK` | Set to `1` on Vercel to honor the pinned pnpm version. |
 | `TEST_BASE_URL` | Optional test-runner setting for the local HTTP server under test; not needed by the application. |
 
 No API key or authentication secret is required. Never add `NEXT_PUBLIC_` to a database setting. `.env` files and local databases are excluded from Git; `.env.example` contains configuration guidance, not credentials.
@@ -91,6 +93,8 @@ Seeding is explicit, uses `[Demo]` labels, preserves existing records, avoids du
 ## How the application works
 
 The server page reads `JobApplication` rows through Prisma and passes plain data to the dashboard. The browser sends create/update/delete requests to `/api/applications`. Route handlers validate input, write to SQLite, and return confirmed results. React updates the list and metrics after a successful response; refreshing reads the database again.
+
+In demo mode, the server instead provides eight explicitly fictional applications with relative example dates. Search, filtering, sorting, charts and read-only notes remain available. Add/edit/delete controls are hidden and all supported mutation routes return HTTP 403 before touching a database. Vercel cannot enable CRUD by setting `APPLYFLOW_DEMO=0`. The local database module also rejects access in demo mode.
 
 One database row represents one application. It has a stable ID, required company/job title/status/applied date, optional location/URL/notes, and created/updated timestamps. Duplicate companies are allowed. Applied dates represent calendar days, stored at UTC midnight.
 
@@ -125,6 +129,7 @@ pnpm lint
 pnpm typecheck
 pnpm test:validation
 pnpm test:analytics
+pnpm test:demo
 pnpm build
 ```
 
@@ -171,11 +176,11 @@ See [the Phase 4A audit](docs/AUDIT-PHASE4A.md) for checks actually performed, f
 
 Repository: [Sameer37609/Applyflow-job-tracker](https://github.com/Sameer37609/Applyflow-job-tracker). The application runs locally; no hosted demo has been deployed. The application scripts do not publish code, change repository visibility, or provision hosted services.
 
-The current local-file SQLite version is **not ready for reliable Vercel persistence**. See [deployment readiness](docs/DEPLOYMENT.md) for the recommended path, required changes, environment names, and approval gates.
+The read-only demo is prepared for Vercel without a hosted database. No deployment has been performed. Follow [the Vercel demo guide](docs/VERCEL-DEMO.md) for exact settings, testing, free-tier limits and publication steps. The local-file SQLite CRUD mode still requires persistent disk and must not be published as an anonymous writable service. [The earlier deployment assessment](docs/DEPLOYMENT.md) explains the future authenticated database path.
 
 ## Limitations and possible next steps
 
-- Single-user, local-only application; no accounts, authentication or authorization. Do not expose personal records through a public writable deployment.
+- Full CRUD is local-only; there are no accounts or authentication. The public demo rejects writes and contains only fictional examples.
 - SQLite requires persistent writable disk and has limited concurrent writes. Independent serverless instances do not share a durable local file.
 - No status history, reminders, attachments, email integrations, live cross-tab synchronization, pagination, or AI features.
 - All saved rows are loaded into memory; server-side aggregation/pagination may help larger datasets.

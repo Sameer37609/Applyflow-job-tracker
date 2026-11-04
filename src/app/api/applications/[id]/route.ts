@@ -1,16 +1,18 @@
-import { db } from "@/lib/db";
-import { serializeApplication, toDatabase } from "@/lib/application-store";
+import { isReadOnlyDemo, readOnlyResponse } from "@/lib/deployment-mode";
 import { validateApplication } from "@/lib/validation";
 import { apiError, sameOrigin } from "@/lib/api-errors";
 export const runtime = "nodejs";
 type Context = { params: Promise<{ id: string }> };
 export async function PATCH(request: Request, context: Context) {
+  if (isReadOnlyDemo()) return readOnlyResponse();
   if (!sameOrigin(request))
     return Response.json(
       { error: "Please submit from your ApplyFlow workspace." },
       { status: 403 },
     );
   try {
+    const { db } = await import("@/lib/db");
+    const { serializeApplication, toDatabase } = await import("@/lib/application-store");
     const { id } = await context.params;
     const result = validateApplication(await request.json());
     if (result.error)
@@ -28,12 +30,14 @@ export async function PATCH(request: Request, context: Context) {
   }
 }
 export async function DELETE(request: Request, context: Context) {
+  if (isReadOnlyDemo()) return readOnlyResponse();
   if (!sameOrigin(request))
     return Response.json(
       { error: "Please submit from your ApplyFlow workspace." },
       { status: 403 },
     );
   try {
+    const { db } = await import("@/lib/db");
     const { id } = await context.params;
     await db.jobApplication.delete({ where: { id } });
     return new Response(null, { status: 204 });

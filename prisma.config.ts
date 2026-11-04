@@ -1,9 +1,12 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 import { resolve } from "node:path";
+import { isReadOnlyDemo } from "./src/lib/deployment-mode";
 
 // Prisma CLI and the runtime adapter must resolve the same file from the project root.
-const databaseUrl = env("DATABASE_URL");
+// Client generation needs a datasource URL but never connects to this file.
+// Hosted demo builds do not require or use a database credential.
+const databaseUrl = isReadOnlyDemo() ? "file:./prisma/demo-unused.db" : env("DATABASE_URL");
 if (!databaseUrl.startsWith("file:"))
   throw new Error("Use a local SQLite file URL.");
 

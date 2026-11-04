@@ -13,6 +13,8 @@
     "db:deploy": "node scripts/ensure-database.mjs && prisma migrate deploy",
     "db:seed": "prisma db seed",
     "test:api": "node --test tests/api.test.mjs",
+    "test:demo": "tsx --test tests/demo.test.ts",
+    "test:demo-api": "node --test tests/demo-api.test.mjs",
     "test:validation": "tsx --test tests/validation.test.ts",
     "test:analytics": "tsx --test tests/analytics.test.ts",
     "test:analytics-api": "tsx --test tests/analytics-api.test.ts"

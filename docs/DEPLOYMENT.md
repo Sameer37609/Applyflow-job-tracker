@@ -1,5 +1,7 @@
 # Deployment readiness — Phase 4A
 
+> Historical assessment of the SQLite CRUD application. Phase 4C now prepares a separate **read-only, database-free demo**; follow [VERCEL-DEMO.md](VERCEL-DEMO.md) for current Vercel settings. The persistence and access-control blockers below still apply to a future hosted writable workspace.
+
 **Status: blocked for public production deployment. No deployment or database switch has been performed.**
 
 ## What exists today

@@ -40,6 +40,7 @@ type Props = {
   onClear: () => void;
   filtered: boolean;
   onAdd: () => void;
+  readOnly?: boolean;
 };
 export function ApplicationTable({
   applications,
@@ -50,6 +51,7 @@ export function ApplicationTable({
   onClear,
   filtered,
   onAdd,
+  readOnly = false,
 }: Props) {
   if (!applications.length)
     return (
@@ -63,14 +65,14 @@ export function ApplicationTable({
         <p>
           {filtered
             ? "Try a different company, role, or status."
-            : "Add your first application and keep your search moving."}
+            : readOnly ? "There are no examples to show." : "Add your first application and keep your search moving."}
         </p>
-        <button
+        {(filtered || !readOnly) && <button
           className="button secondary"
           onClick={filtered ? onClear : onAdd}
         >
           {filtered ? "Clear filters" : "Add an application"}
-        </button>
+        </button>}
       </div>
     );
   return (
@@ -145,24 +147,24 @@ export function ApplicationTable({
                     className="icon-button"
                     aria-label={`View notes for ${application.company}`}
                     onClick={() => onNotes(application)}
-                    title="View and edit notes"
+                    title={readOnly ? "View notes" : "View and edit notes"}
                   >
                     <MessageSquare size={15} />
                   </button>
-                  <button
+                  {!readOnly && <button
                     className="icon-button"
                     aria-label={`Edit ${application.company} application`}
                     onClick={() => onEdit(application)}
                   >
                     <Pencil size={15} />
-                  </button>
-                  <button
+                  </button>}
+                  {!readOnly && <button
                     className="icon-button delete-button"
                     aria-label={`Delete ${application.company} application`}
                     onClick={() => onDelete(application)}
                   >
                     <Trash2 size={15} />
-                  </button>
+                  </button>}
                 </div>
               </td>
             </tr>

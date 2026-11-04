@@ -15,12 +15,14 @@ type Props = {
   onClose: () => void;
   onSave: (value: ApplicationInput) => Promise<void>;
   focusNotes?: boolean;
+  readOnly?: boolean;
 };
 export function ApplicationForm({
   application,
   onClose,
   onSave,
   focusNotes = false,
+  readOnly = false,
 }: Props) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState("");
@@ -46,6 +48,7 @@ export function ApplicationForm({
   }, [focusNotes]);
   async function submit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (readOnly) return;
     if (submitting.current) return;
     const data = new FormData(event.currentTarget);
     const company = String(data.get("company") ?? "").trim();
@@ -115,10 +118,10 @@ export function ApplicationForm({
         </button>
       </div>
       <h2 id="form-title">
-        {application ? "Edit application" : "A new opportunity"}
+        {readOnly ? "Application details" : application ? "Edit application" : "A new opportunity"}
       </h2>
       <p id="form-description">
-        {application
+        {readOnly ? "Fictional portfolio example. This public demo is read-only." : application
           ? "Keep the details of your next chapter up to date."
           : "Small steps lead to big things. Let’s track this one."}
       </p>
@@ -136,6 +139,7 @@ export function ApplicationForm({
             Company <span>*</span>
             <input
               name="company"
+              readOnly={readOnly}
               placeholder="e.g. Linear"
               required
               maxLength={80}
@@ -147,6 +151,7 @@ export function ApplicationForm({
             Job title <span>*</span>
             <input
               name="role"
+              readOnly={readOnly}
               placeholder="e.g. Frontend Engineer"
               required
               maxLength={100}
@@ -158,6 +163,7 @@ export function ApplicationForm({
               Status <span>*</span>
               <select
                 name="status"
+                disabled={readOnly}
                 defaultValue={application?.status ?? "Applied"}
               >
                 {statuses.map((status) => (
@@ -170,6 +176,7 @@ export function ApplicationForm({
               <input
                 type="date"
                 name="date"
+                readOnly={readOnly}
                 required
                 max={localToday()}
                 min="1900-01-01"
@@ -181,6 +188,7 @@ export function ApplicationForm({
             Location <small>Optional</small>
             <input
               name="location"
+              readOnly={readOnly}
               maxLength={100}
               placeholder="e.g. Remote"
               defaultValue={application?.location}
@@ -190,6 +198,7 @@ export function ApplicationForm({
             Application URL <small>Optional</small>
             <input
               name="applicationUrl"
+              readOnly={readOnly}
               type="url"
               maxLength={2048}
               placeholder="https://company.com/careers/role"
@@ -201,6 +210,7 @@ export function ApplicationForm({
             <textarea
               aria-label="Notes"
               name="notes"
+              readOnly={readOnly}
               rows={5}
               maxLength={1000}
               placeholder="Anything you’d like to remember…"
@@ -208,8 +218,7 @@ export function ApplicationForm({
               defaultValue={application?.notes}
             />
             <span className="notes-help" id="notes-help">
-              Add next steps, interview prep, or follow-up details. Notes are
-              included in search.
+              {readOnly ? "View example notes here. Run the project locally to edit your own applications." : "Add next steps, interview prep, or follow-up details. Notes are included in search."}
             </span>
           </label>
           {error && (
@@ -223,7 +232,7 @@ export function ApplicationForm({
             </p>
           )}
           <p className="form-footnote">
-            Saved to your local database when you submit.
+            {readOnly ? "Read-only demo · no personal records or database connection." : "Saved to your local database when you submit."}
           </p>
           <div className="dialog-actions">
             <button
@@ -231,15 +240,15 @@ export function ApplicationForm({
               className="button secondary"
               onClick={onClose}
             >
-              Cancel
+              {readOnly ? "Close" : "Cancel"}
             </button>
-            <button className="button primary" type="submit">
+            {!readOnly && <button className="button primary" type="submit">
               {pending
                 ? "Saving…"
                 : application
                   ? "Save changes"
                   : "Add application"}
-            </button>
+            </button>}
           </div>
         </fieldset>
       </form>

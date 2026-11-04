@@ -46,9 +46,11 @@ const navigation = [
 export function Dashboard({
   initialApplications,
   reportDate,
+  readOnly = false,
 }: {
   initialApplications: Application[];
   reportDate: string;
+  readOnly?: boolean;
 }) {
   const [applications, setApplications] =
     useState<Application[]>(initialApplications);
@@ -107,6 +109,7 @@ export function Dashboard({
   const [pending, setPending] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   async function save(value: ApplicationInput) {
+    if (readOnly) throw new Error("This portfolio demo is read-only.");
     if (mutationLock.current) return;
     mutationLock.current = true;
     setPending(true);
@@ -155,6 +158,7 @@ export function Dashboard({
     }
   }
   async function remove() {
+    if (readOnly) return;
     if (!deleting || mutationLock.current) return;
     mutationLock.current = true;
     setPending(true);
@@ -306,8 +310,8 @@ export function Dashboard({
             </span>
             <h3>Your next chapter awaits.</h3>
             <p>A little progress every day goes a long way.</p>
-            <button onClick={() => setForm({ application: null })}>
-              Track an opportunity <ArrowRight size={14} />
+            <button onClick={() => readOnly ? navigate("Applications") : setForm({ application: null })}>
+              {readOnly ? "Explore applications" : "Track an opportunity"} <ArrowRight size={14} />
             </button>
           </div>
           <button
@@ -348,7 +352,7 @@ export function Dashboard({
           <div className="header-right">
             <span className="demo-pill">
               <span />
-              Local workspace
+              {readOnly ? "Read-only demo" : "Local workspace"}
             </span>
             <span
               className="header-avatar"
@@ -359,6 +363,7 @@ export function Dashboard({
           </div>
         </header>
         <main id="main-content" className="main-content">
+          {readOnly && <aside className="demo-banner" aria-label="Portfolio demo information"><div><strong>Read-only portfolio demo</strong><p>Fictional applications and relative example dates. Search, filter and explore analytics; adding, editing and deleting are available in the local project.</p></div><a href="https://github.com/Sameer37609/Applyflow-job-tracker" target="_blank" rel="noreferrer">View source <ArrowUpRight size={15}/></a></aside>}
           <div className="page-heading">
             <div>
               <div className="eyebrow">YOUR CAREER, IN MOTION</div>
@@ -381,7 +386,7 @@ export function Dashboard({
                       : "Get comfortable with your ApplyFlow workspace."}
               </p>
             </div>
-            {section !== "Guide" && (
+            {section !== "Guide" && !readOnly && (
               <button
                 className="button primary add-button"
                 onClick={() => setForm({ application: null })}
@@ -411,10 +416,10 @@ export function Dashboard({
                 </span>
                 <h2>About this workspace</h2>
                 <p>
-                  ApplyFlow Phase 3 saves applications in a local SQLite
+                  {readOnly ? "You’re viewing fictional examples in a read-only portfolio demo. This deployment does not connect to a database or accept writes. Clone the source to use the full SQLite CRUD workspace locally." : <>ApplyFlow Phase 3 saves applications in a local SQLite
                   database. Your records survive refreshes and server restarts.
                   This is a personal local workspace with no authentication.
-                  Optional seed records are fictional and marked [Demo].
+                  Optional seed records are fictional and marked [Demo].</>}
                 </p>
                 <button
                   className="button secondary"
@@ -466,7 +471,7 @@ export function Dashboard({
                       ),
                     )}
                   </section>
-                  <Analytics applications={applications} today={reportDate} />
+                  <Analytics applications={applications} today={reportDate} demo={readOnly} />
                   <section className="momentum-banner">
                     <div className="momentum-symbol">
                       <Sparkles size={23} />
@@ -523,7 +528,7 @@ export function Dashboard({
                   </div>
                   <span className="live-state">
                     <span />
-                    Saved locally
+                    {readOnly ? "Fictional examples" : "Saved locally"}
                   </span>
                 </div>
                 <div className="table-toolbar">
@@ -606,6 +611,7 @@ export function Dashboard({
                   </div>
                 </div>
                 <ApplicationTable
+                  readOnly={readOnly}
                   applications={visible}
                   onEdit={(application) => setForm({ application })}
                   onNotes={(application) =>
@@ -621,7 +627,7 @@ export function Dashboard({
                     setFilter("All");
                   }}
                   filtered={!!query || filter !== "All"}
-                  onAdd={() => setForm({ application: null })}
+                  onAdd={() => { if (!readOnly) setForm({ application: null }); }}
                 />
                 <div
                   className="table-footer"
@@ -640,10 +646,9 @@ export function Dashboard({
               </section>
               <div className="demo-note">
                 <span>
-                  <CircleHelp size={14} /> Your applications are saved to this
-                  device.
+                  <CircleHelp size={14} /> {readOnly ? "Fictional demo data. Your interactions do not modify shared records." : "Your applications are saved to this device."}
                 </span>
-                <span>Saved in your local database.</span>
+                <span>{readOnly ? "No database connected." : "Saved in your local database."}</span>
               </div>
             </>
           )}
@@ -673,6 +678,7 @@ export function Dashboard({
       {form && (
         <ApplicationForm
           application={form.application}
+          readOnly={readOnly}
           focusNotes={form.focusNotes}
           onClose={() => setForm(null)}
           onSave={save}
