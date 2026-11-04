@@ -1,0 +1,12 @@
+nodeLinker: hoisted
+packageImportMethod: copy
+storeDir: .pnpm-store
+verifyDepsBeforeRun: false
+supportedArchitectures:
+  os: [current]
+  cpu: [current]
+allowBuilds:
+  better-sqlite3: true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true

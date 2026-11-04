@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ApplicationStatus {
+  APPLIED
+  IN_REVIEW
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+model JobApplication {
+  id             String            @id @default(cuid())
+  companyName    String
+  jobTitle       String
+  location       String?
+  status         ApplicationStatus @default(APPLIED)
+  appliedDate    DateTime
+  applicationUrl String?
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([appliedDate])
+}
