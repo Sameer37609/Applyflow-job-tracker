@@ -1,22 +1,53 @@
 # ApplyFlow — Smart Job Application Tracker
 
-A focused workspace for organizing a job search: track applications, keep notes, and understand progress through clear, database-backed analytics.
+**[Live Demo](https://applyflow-job-tracker.vercel.app/) · [GitHub Source](https://github.com/Sameer37609/Applyflow-job-tracker)**
 
-ApplyFlow has two modes: a single-user local workspace with real SQLite persistence, and a clearly labeled, read-only portfolio demo for Vercel. The public demo uses fictional examples, never personal database records. It is not a public multi-user service.
+A full-stack job application tracker built with Next.js, TypeScript and Prisma. Organize applications, maintain notes, and explore application status and activity through a responsive dashboard.
+
+**The hosted application is a safe, read-only portfolio demo.** It displays eight explicitly fictional applications with relative example dates, connects to no database, and rejects create, update and delete requests on the server. Company names and outcomes are illustrative; they do not represent real applications, vacancies or hiring results.
+
+Local development provides the full Prisma-backed SQLite CRUD workspace. Saved local records persist across browser refreshes and server restarts. Personal records and database files are not included in the public demo or repository. There are no accounts or authentication; this is not a public multi-user service.
 
 ## Features
 
-- Create, view, edit, and delete applications, with deletion confirmation.
-- Store company, job title, location, status, date applied, application URL, and notes.
+Available in both modes, using fictional examples on the hosted demo and saved database records locally:
+
 - Search company, role, location, and notes; combine search with status filtering.
 - Sort by newest, oldest, company name, or status.
-- View saved-record totals, current interviews, offers, and rejections.
+- View total applications, current interviews, offers, rejections and interview conversion.
 - Explore status distribution and six calendar months of application activity.
-- Open and edit notes directly from the list.
+- Open application details and notes directly from the list.
 - Responsive desktop/tablet dashboard and mobile application cards.
+- Keyboard-accessible dialogs, visible focus, text status labels, and a monthly chart-data disclosure.
+
+Additional functionality in the local SQLite workspace:
+
+- Create, view, edit, and delete applications, with deletion confirmation.
+- Store company, job title, location, status, date applied, application URL, and notes.
+- Edit notes and retain saved changes after refresh or server restart.
 - Required-field, date, length, status, and HTTP/HTTPS URL validation on client and server.
 - Pending submission guards, success messages, friendly errors, and useful empty states.
-- Keyboard-accessible dialogs, visible focus, text status labels, and a monthly chart-data disclosure.
+
+## Try and verify the live demo
+
+No installation or login is required. Open [ApplyFlow on Vercel](https://applyflow-job-tracker.vercel.app/).
+
+1. **Dashboard:** confirm the read-only portfolio banner and `[Demo]` labels. The current fictional dataset has 8 applications, 2 interviews, 1 offer and 1 rejection; interview conversion is 38%.
+2. **Search:** search for `Notion`, then a term from an example's notes. Try an unmatched query to see the empty state, then clear it.
+3. **Filters and sorting:** select `Interview` to see two examples; combine it with search. Clear the filters and compare newest/oldest, company and status sorting.
+4. **Analytics:** inspect the status chart and six-month activity chart, including its chart-data disclosure. Totals use all eight examples; list filters do not change the analytics. Dates shift relative to the current day, so monthly buckets can change.
+5. **Notes and read-only behavior:** open an application's details or notes. Values are read-only and add/edit/delete controls are unavailable. Refresh to confirm the fictional examples remain available.
+6. **Responsive and keyboard behavior:** resize to mobile width, then use Tab, Shift+Tab and Escape to explore navigation and dialogs.
+
+For an automated HTTP check from a local checkout:
+
+```powershell
+$env:TEST_BASE_URL = "https://applyflow-job-tracker.vercel.app"
+pnpm test:demo-api
+Remove-Item Env:TEST_BASE_URL
+```
+
+This test checks the page and fictional records, verifies POST/PATCH/DELETE requests return HTTP 403, and confirms the records are unchanged. It does not automate browser interactions. Do not run the writable `test:api` or `test:analytics-api` suites against the public demo.
 
 ## Screenshot
 
@@ -39,7 +70,7 @@ The checked-in pnpm lockfile records exact dependency resolutions. Node.js 24 LT
 
 ## Local setup
 
-Open a terminal in the repository root after cloning or downloading it. The suggested repository name is `applyflow-job-tracker`.
+Clone [the GitHub repository](https://github.com/Sameer37609/Applyflow-job-tracker) or download its source, then open a terminal in the repository root. Use a fresh terminal without `APPLYFLOW_DEMO` or `VERCEL` flags for local CRUD.
 
 ```powershell
 pnpm install --frozen-lockfile
@@ -92,7 +123,7 @@ Seeding is explicit, uses `[Demo]` labels, preserves existing records, avoids du
 
 ## How the application works
 
-The server page reads `JobApplication` rows through Prisma and passes plain data to the dashboard. The browser sends create/update/delete requests to `/api/applications`. Route handlers validate input, write to SQLite, and return confirmed results. React updates the list and metrics after a successful response; refreshing reads the database again.
+In local CRUD mode, the server page reads `JobApplication` rows through Prisma and passes plain data to the dashboard. The browser sends create/update/delete requests to `/api/applications`. Route handlers validate input, write to SQLite, and return confirmed results. React updates the list and metrics after a successful response; refreshing reads the database again.
 
 In demo mode, the server instead provides eight explicitly fictional applications with relative example dates. Search, filtering, sorting, charts and read-only notes remain available. Add/edit/delete controls are hidden and all supported mutation routes return HTTP 403 before touching a database. Vercel cannot enable CRUD by setting `APPLYFLOW_DEMO=0`. The local database module also rejects access in demo mode.
 
@@ -104,7 +135,7 @@ One database row represents one application. It has a stable ID, required compan
 - Activity groups `appliedDate` into the current calendar month and five preceding months, including zero-count months. The current month is partial. Older records remain in all-time totals.
 - Interview conversion is `(current Interview + Offer) / all applications × 100`, rounded to a whole percentage. No records produces a dash.
 - This conversion is a current-status proxy, not a historical funnel: past interviews for rejected applications cannot be inferred without status history.
-- Analytics use all saved records. Search/status filters affect only the list. Refresh after the month changes to refresh the reporting window.
+- Analytics use all saved records locally or all fictional examples in the hosted demo. Search/status filters affect only the list. Refresh after the month changes to refresh the reporting window.
 
 ### Source map
 
@@ -116,6 +147,8 @@ src/lib/validation.ts        Shared runtime validation
 src/lib/db.ts                Server-only Prisma connection
 src/lib/application-store.ts Database mapping and reads
 src/lib/analytics.ts         Pure calculations, search and sorting
+src/lib/deployment-mode.ts   Server-enforced read-only demo selection
+src/lib/demo-applications.ts Fictional hosted examples, independent of SQLite
 prisma/                      Schema, migrations and optional demo seed
 scripts/ensure-database.mjs   Non-destructive local SQLite initialization
 tests/                       Validation, analytics and HTTP integration tests
@@ -158,7 +191,7 @@ pnpm test:analytics-api
 
 The analytics integration test requires an empty database, inserts known records, verifies calculations, and cleans up its fixtures. Stop the test server and close the test terminals afterward so temporary environment settings do not affect normal development. A populated test database must be handled intentionally; the test will not clear it for you.
 
-For macOS/Linux, set equivalent shell environment variables before the commands. No hosted service is contacted by the application's tests, except the package registry when installing tools.
+For macOS/Linux, set equivalent shell environment variables before the commands. HTTP tests contact the server specified by `TEST_BASE_URL`; the live-demo check above contacts Vercel. Use an isolated local server for writable integration tests.
 
 ### Manual acceptance checklist
 
@@ -174,9 +207,11 @@ See [the Phase 4A audit](docs/AUDIT-PHASE4A.md) for checks actually performed, f
 
 ## GitHub and deployment status
 
-Repository: [Sameer37609/Applyflow-job-tracker](https://github.com/Sameer37609/Applyflow-job-tracker). The application runs locally; no hosted demo has been deployed. The application scripts do not publish code, change repository visibility, or provision hosted services.
+The read-only portfolio demo is deployed at **[applyflow-job-tracker.vercel.app](https://applyflow-job-tracker.vercel.app/)**. Recruiters can browse the implementation, tests and Prisma schema at **[Sameer37609/Applyflow-job-tracker](https://github.com/Sameer37609/Applyflow-job-tracker)**.
 
-The read-only demo is prepared for Vercel without a hosted database. No deployment has been performed. Follow [the Vercel demo guide](docs/VERCEL-DEMO.md) for exact settings, testing, free-tier limits and publication steps. The local-file SQLite CRUD mode still requires persistent disk and must not be published as an anonymous writable service. [The earlier deployment assessment](docs/DEPLOYMENT.md) explains the future authenticated database path.
+Live HTTP verification passed: the dashboard and records endpoint returned 200, all eight records were labeled as demo data, and ten tested mutation requests returned 403 without changing the dataset. GitHub `main` was verified at application commit `61a2c36`. This check does not claim automated live-browser or comprehensive accessibility coverage.
+
+The application scripts do not publish code, change repository visibility, or provision hosted services. [The Vercel preparation guide](docs/VERCEL-DEMO.md) records the deployment settings and earlier preparation checks; its pre-deployment statements describe that earlier stage. The local-file SQLite CRUD mode still requires persistent disk and must not be published as an anonymous writable service. [The earlier deployment assessment](docs/DEPLOYMENT.md) explains the future authenticated database path.
 
 ## Limitations and possible next steps
 
