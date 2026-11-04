@@ -169,7 +169,7 @@ See [the Phase 4A audit](docs/AUDIT-PHASE4A.md) for checks actually performed, f
 
 ## GitHub and deployment status
 
-Suggested repository name: **applyflow-job-tracker**. Local preparation is not publication. No remote repository, push, visibility change, hosted database, or deployment is performed by the application scripts.
+Repository: [Sameer37609/Applyflow-job-tracker](https://github.com/Sameer37609/Applyflow-job-tracker). The application runs locally; no hosted demo has been deployed. The application scripts do not publish code, change repository visibility, or provision hosted services.
 
 The current local-file SQLite version is **not ready for reliable Vercel persistence**. See [deployment readiness](docs/DEPLOYMENT.md) for the recommended path, required changes, environment names, and approval gates.
 

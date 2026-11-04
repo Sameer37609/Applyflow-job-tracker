@@ -10,6 +10,7 @@ src/generated/prisma/
 *.db-journal
 *.db-wal
 *.db-shm
+*.db.*
 next-env.d.ts
 .vercel/
 coverage/
@@ -23,6 +24,10 @@ build/
 *.sqlite3-journal
 *.sqlite3-wal
 *.sqlite3-shm
+*.sqlite.*
+*.sqlite3.*
+backups/
+*.bak
 *.pem
 *.key
 .DS_Store
